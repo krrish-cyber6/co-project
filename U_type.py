@@ -66,4 +66,18 @@ def u_type(instruction):
         print("the immediate can't be represented using a 20 bit 2's complement representation")
         return
     
+     #converting the immediate to 20 bit 2's complement form 
+    if int_imm>=0:
+        imm_binary=(bin(int_imm))[2:]
+        immediate="0"*(20-len(imm_binary))+imm_binary
+    else:
+        int_imm = 2**20 + int_imm
+        imm_binary=(bin(int_imm))[2:]
+        immediate="0"*(20-len(imm_binary))+imm_binary
+        
+    #final binary instruction
+    # U-type instruction format: imm[31:12] | rd | opcode
+    binary_instruction = immediate + REGISTER_MAPPING[rd] + u_type_info[instruction_name]["opcode"]
+    return binary_instruction
+
 
