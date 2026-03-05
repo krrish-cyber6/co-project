@@ -47,6 +47,7 @@ def toBinary(S):
         #CHECKS FOR REG
         if rs1 == [0]:
             print("x0 being used to store value!")
+            
 
         if x[0] == "lw":
 
