@@ -3,6 +3,8 @@ from r_type import r_to_bin
 from j_type import j_to_bin
 from s_type import s_to_bin
 from u_type import u_to_bin
+from b_type import b_to_bin
+from i_type import i_to_bin
 
 def createLabels(data):
     d={}
@@ -23,6 +25,8 @@ with open(data_file,"r") as f:
 pc=0
 labels = createLabels(data)
 operations = ["add","sub","sll","slt","sltu","xor","srl","sra","or","and","jal","sw","auipc","lui"]
+operations = ["add","sub","sll","slt","sltu","xor","srl","sra","or","and","jal","sw","auipc","lui"
+              ]
 for i in data:
     temp = i.split(" ")
     if temp[0] in operations[0:10]:
@@ -39,7 +43,7 @@ for i in data:
 
     elif temp[0] in operations[12:14]:
         wdata = u_to_bin(i)
-        
+
 
     
 

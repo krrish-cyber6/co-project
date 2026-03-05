@@ -1,18 +1,15 @@
 from store import Register_Mapping
-with open("data.txt","r") as f:
-    l=f.readlines()
-
-def b_type_encoder(func,r1,r2,off_val):
+def b_type_encoder(func,r1,r2,off_val,pc,labels):
     b_func3={"beq":"000","bne":"001","blt":"100","bge":"101","bltu":"110","bgeu":"111"}
     opcode="1100011"
     if off_val.lstrip("-").isdigit():
         offset=int(off_val)
     else:
         if off_val not in labels:
-            return "No such Label defined"
+            raise Exception
         offset=labels[off_val]-pc
     if offset <-2048 or offset >2047:#range -2^(n-1)-(2^(n-1))-1
-        return "Offset not in appropriate branch range"
+        raise Exception
     if offset<0:
         offset=(1<<12)+offset
     imm=format(offset,"012b")
@@ -24,24 +21,12 @@ def b_type_encoder(func,r1,r2,off_val):
     r2=Register_Mapping[r2]
     return imm_12+imm10_5+r2+r1+b_func3[func]+imm4_1+imm_11+opcode
 
-labels={}#label definition
-pc_count=0
-for ins in l:
-    if ":" in ins:
-        b=ins.split(":")
-        labels[b[0].strip()]=pc_count
-        pc_count+=4
-    else:
-        pc_count+=4
-
-pc=0
-try:
-    for ins in l:
+def b_type_bin_return(ins,pc,labels):
+    try:
         if ":" in ins:
             ins = ins.split(":")[1].strip()
         ins=ins.replace(",", " ")
         a=ins.split()
-        print(b_type_encoder(a[0],a[1],a[2],a[3]))
-        pc+=4
-except:
-    print("There is some error in the instruction passed")
+        return b_type_encoder(a[0],a[1],a[2],a[3],pc,labels)
+    except:
+        raise Exception("There is some error in the instruction passed")
