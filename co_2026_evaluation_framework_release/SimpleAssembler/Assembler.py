@@ -1,4 +1,5 @@
 import sys
+sys.path.append('../../assembler')
 from r_type import r_to_bin
 from j_type import j_to_bin
 from s_type import s_to_bin
@@ -24,8 +25,8 @@ with open(data_file,"r") as f:
     data = f.readlines()
 pc=0
 labels = createLabels(data)
-operations = ["add","sub","sll","slt","sltu","xor","srl","sra","or","and","jal","sw","auipc","lui"
-              ]
+operations = ["add","sub","sll","slt","sltu","xor","srl","sra","or","and","jal","sw","auipc","lui",
+              "beq","bne","blt","bge","bltu","bgeu","lw","addi","sltiu","jalr"]
 for i in data:
     temp = i.split(" ")
     if temp[0] in operations[0:10]:
@@ -37,7 +38,18 @@ for i in data:
             wdata = j_to_bin(i,pc,labels[label])
         else:
             wdata = j_to_bin(i,int(label))
-    
+    elif temp[0]==operations[11]:
+        wdata = s_to_bin(i)
+    elif temp[0] in operations[12:14]:
+        wdata = u_to_bin(i)
+    elif temp[0] in operations[14:20]:
+        wdata = b_to_bin(i)
+    elif temp[0] in operations[20:24]:
+        wdata = i_to_bin(i)
+
+with (output_file,"w") as f:
+    f.write(wdata)
+
 
 
 
