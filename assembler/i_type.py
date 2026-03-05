@@ -14,11 +14,11 @@ def imm_to_bin(imm):
     if imm >= 0:
         return format(imm, "012b")
     else:
-        return format( ~imm + 1, "012b")
+        return format( (1<<12) - abs(imm), "012b")
 
 #Function to convert register value to binary            
 def reg_to_bin(reg):
-    return format(Register_Mapping[reg], "05b")
+    return format(int(Register_Mapping[reg]), "05b")
           
 #Function to convert instructions to binary     
 def itoBinary(inp):
@@ -42,7 +42,7 @@ def itoBinary(inp):
                 
         print(imm + rs + funct3 + rd + opcode)
     except:
-        raise Exception("Invalid assembly command")
+            raise Exception("Invalid assembly command")
 itoBinary(inp)          
 
                       
