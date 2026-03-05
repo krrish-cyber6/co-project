@@ -6,10 +6,10 @@ def b_type_encoder(func,r1,r2,off_val,pc,labels):
         offset=int(off_val)
     else:
         if off_val not in labels:
-            return "No such Label defined"
+            raise Exception
         offset=labels[off_val]-pc
     if offset <-2048 or offset >2047:#range -2^(n-1)-(2^(n-1))-1
-        return "Offset not in appropriate branch range"
+        raise Exception
     if offset<0:
         offset=(1<<12)+offset
     imm=format(offset,"012b")
@@ -29,4 +29,4 @@ def b_type_bin_return(ins,pc,labels):
         a=ins.split()
         return b_type_encoder(a[0],a[1],a[2],a[3],pc,labels)
     except:
-        return "There is some error in the instruction passed"
+        raise Exception("There is some error in the instruction passed")
