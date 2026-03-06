@@ -1,6 +1,6 @@
-from store import Register_Mapping,U_TYPE
+from store import Register_Mapping,U_Type
 REGISTER_MAPPING = Register_Mapping
-u_type_info=U_TYPE 
+u_type_info=U_Type
 
 def u_to_bin(instruction):  
 
@@ -8,27 +8,15 @@ def u_to_bin(instruction):
     part1=instruction.split()
     instruction_name = part1[0]
 
-    # instruction validation
-    if instruction_name not in u_type_info:
-        raise ValueError("invalid instruction")
+
             
     part2=part1[1].split(",")
     rd=part2[0]
     imm=part2[1]
 
-    #checking if the register is valid
-    if rd not in REGISTER_MAPPING:
-        raise ValueError("invalid register")
-            
     #checking if immediate is an integer 
-    try:
-        int_imm=int(imm)
-    except:
-        raise ValueError("immediate is not a valid integer")
-            
-    #checking if the immediate is in the 20 bit 2's complement range 
-    if not (-2**19 <= int_imm <= 2**19 - 1):
-        raise ValueError("immediate out of range")
+    int_imm=int(imm)
+
             
      #converting the immediate to 20 bit 2's complement form 
     if int_imm>=0:
