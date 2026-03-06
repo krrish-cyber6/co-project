@@ -1,6 +1,6 @@
-from store import Register_Mapping,S_TYPE
+from store import Register_Mapping,S_Type
 REGISTER_MAPPING = Register_Mapping
-s_type_info=S_TYPE
+s_type_info=S_Type
 
 def s_to_bin(instruction):    
 
@@ -9,8 +9,7 @@ def s_to_bin(instruction):
     instruction_name = part1[0]
 
     # instruction validation
-    if instruction_name not in s_type_info:
-        raise ValueError("invalid instruction")
+
     
     part2=part1[1].split(",")
     rs2=part2[0]
@@ -18,20 +17,13 @@ def s_to_bin(instruction):
     rs1=base_offset[1]
     imm=base_offset[0]
     
-    #checking if the register is valid
-    if rs1 not in REGISTER_MAPPING or rs2 not in REGISTER_MAPPING:
-        raise ValueError("invalid register")
     
     #checking if immediate is an integer 
-    try:
-        int_imm=int(imm)
-    except:
-        raise ValueError("immediate is not a valid integer")
+
+    int_imm=int(imm)
     
     #checking if the immediate is in the 12 bit 2's complement range 
-    if not (-2048<=int_imm<=2047):
-        raise ValueError("immediate out of range")
-            
+
     #converting the immediate to 12 bit 2's complement form 
     if int_imm>=0:
         imm_binary=(bin(int_imm))[2:]

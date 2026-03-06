@@ -1,10 +1,69 @@
+import sys
+sys.path.append(".assembler/")
+from r_type import r_to_bin
+from j_type import j_to_bin
+from b_type import b_to_bin
+from u_type import u_to_bin
+from s_type import s_to_bin
 from i_type import i_to_bin
+from store import I_Type,R_Type,B_Type
 
-with open("./assembler/data.txt","r") as fin:
-    L = fin.readlines()
-try:
-    for i in L:
-        a = i_to_bin(i)
-        print(a)        
-except:
-    raise Exception("wrong")   
+data_file = sys.argv[1]
+out_file = sys.argv[2]
+with open(data_file,"r") as f:
+    data = [i.strip() for i in f.readlines()]
+
+def labels(data):
+    dic = {}
+    pc=0
+    for i in data:
+        if ":" in i:
+            label = i.split(":")[0]
+            dic[label.strip()]=pc
+            t = i.split(":")[1]
+            if t.strip!="":
+                pc+=4
+        else:
+            pc+=4
+
+    return dic
+
+wdata = []
+pc=0
+labels = labels(data)
+for i in data:
+    if ":" in i:
+        temp = i.split(":")
+        if temp[1].strip()=="":
+            continue
+        instruction = temp[1].strip()
+    else:
+        instruction=i
+    operation = instruction.split()[0]
+
+    if operation in R_Type:
+        wdata.append(r_to_bin(instruction))
+    elif operation in I_Type:
+        wdata.append(i_to_bin(instruction))
+    elif operation in B_Type:
+        wdata.append(b_to_bin(instruction,pc,labels))
+    elif operation=="sw":
+        wdata.append(s_to_bin(instruction))
+    elif operation=="jal":
+        wdata.append(j_to_bin(instruction,pc,labels))
+    elif operation in ["lui","auipc"]:
+        wdata.append(u_to_bin(instruction))
+    pc+=4
+
+
+with open(out_file,"w") as f:
+    for i in wdata:
+        f.write(i+'\n')
+
+with open("out.txt","r") as f:
+    d = f.readlines()
+
+with open("sol.txt","r") as f:
+    d2 = f.readlines()
+for i in range(len(d)):
+    print(f"{i+1}. {d[i]==d2[i]}")
