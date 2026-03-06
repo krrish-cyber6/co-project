@@ -57,7 +57,9 @@ for i in data:
             wdata.append(u_to_bin(instruction))
         pc+=4
     except: 
-        print(pc/4)
+        print((pc/4)+1)
+        pc+=4
+        wdata.append("0")
 
 
 with open(out_file,"w") as f:
@@ -70,8 +72,5 @@ with open("out.txt","r") as f:
 with open("sol.txt","r") as f:
     d2 = f.readlines()
 for i in range(len(d)):
-    try:
-        print(f"{i+1}. {d[i]==d2[i]}")
-
-    except:
-        print(i)
+    
+    print(f"{i+1}. {d[i].strip()==d2[i].strip()}")
