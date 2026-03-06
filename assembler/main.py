@@ -32,28 +32,32 @@ wdata = []
 pc=0
 labels = labels(data)
 for i in data:
-    if ":" in i:
-        temp = i.split(":")
-        if temp[1].strip()=="":
-            continue
-        instruction = temp[1].strip()
-    else:
-        instruction=i
-    operation = instruction.split()[0]
+    try:
 
-    if operation in R_Type:
-        wdata.append(r_to_bin(instruction))
-    elif operation in I_Type:
-        wdata.append(i_to_bin(instruction))
-    elif operation in B_Type:
-        wdata.append(b_to_bin(instruction,pc,labels))
-    elif operation=="sw":
-        wdata.append(s_to_bin(instruction))
-    elif operation=="jal":
-        wdata.append(j_to_bin(instruction,pc,labels))
-    elif operation in ["lui","auipc"]:
-        wdata.append(u_to_bin(instruction))
-    pc+=4
+        if ":" in i:
+            temp = i.split(":")
+            if temp[1].strip()=="":
+                continue
+            instruction = temp[1].strip()
+        else:
+            instruction=i
+        operation = instruction.split()[0]
+
+        if operation in R_Type:
+            wdata.append(r_to_bin(instruction))
+        elif operation in I_Type:
+            wdata.append(i_to_bin(instruction))
+        elif operation in B_Type:
+            wdata.append(b_to_bin(instruction,pc,labels))
+        elif operation=="sw":
+            wdata.append(s_to_bin(instruction))
+        elif operation=="jal":
+            wdata.append(j_to_bin(instruction,pc,labels))
+        elif operation in ["lui","auipc"]:
+            wdata.append(u_to_bin(instruction))
+        pc+=4
+    except: 
+        print(pc/4)
 
 
 with open(out_file,"w") as f:
@@ -66,4 +70,8 @@ with open("out.txt","r") as f:
 with open("sol.txt","r") as f:
     d2 = f.readlines()
 for i in range(len(d)):
-    print(f"{i+1}. {d[i]==d2[i]}")
+    try:
+        print(f"{i+1}. {d[i]==d2[i]}")
+
+    except:
+        print(i)
