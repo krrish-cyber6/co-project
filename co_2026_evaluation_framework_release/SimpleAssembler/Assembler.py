@@ -1,66 +1,59 @@
 import sys
-sys.path.append('../../assembler')
-from r_type import r_to_bin
-from j_type import j_to_bin
-from s_type import s_to_bin
-from u_type import u_to_bin
-from b_type import b_to_bin
-from i_type import i_to_bin
+from assembler.r_type import r_to_bin
+from assembler.j_type import j_to_bin
+from assembler.i_type import i_to_bin
+from assembler.b_type import b_to_bin
+from assembler.u_type import u_to_bin
+from assembler.s_type import s_to_bin
+from assembler.store import I_Type,R_Type,B_Type
 
-def createLabels(data):
-    d={}
+data_file = sys.argv[1]
+out_file = sys.argv[2]
+with open(data_file,"r") as f:
+    data = [i.strip() for i in f.readlines()]
+
+def labels(data):
+    dic = {}
     pc=0
     for i in data:
         if ":" in i:
-            temp = i.split(":")
-            d[temp[0]]=pc
-        pc+=4
-    
-    return d
-            
-
-data_file = sys.argv[1]
-output_file = sys.argv[2]
-with open(data_file,"r") as f:
-    data = f.readlines()
-pc=0
-labels = createLabels(data)
-operations = ["add","sub","sll","slt","sltu","xor","srl","sra","or","and","jal","sw","auipc","lui",
-              "beq","bne","blt","bge","bltu","bgeu","lw","addi","sltiu","jalr"]
-
-for i in data:
-    i=i.strip()
-    temp = i.split(" ")
-    if ":" in i:
-        line_label = temp[0][:-1]
-        operation = temp[1]
-    else:
-        operation = temp[0]
-
-    if operation in operations[0:10]:
-        wdata = r_to_bin(i)
-
-    elif operation==operations[10]:
-        temp1 = i.split()
-        target = temp1[1].split(",")[1]
-        if target in labels:
-            wdata = j_to_bin(i,pc,labels[target])
+            label = i.split(":")[0]
+            dic[label.strip()]=pc
+            t = i.split(":")[1]
+            if t.strip!="":
+                pc+=4
         else:
-            wdata = j_to_bin(i,pc,int(target))
+            pc+=4
 
-    elif operation==operations[11]:
-        wdata = s_to_bin(i)
-    elif operation in operations[12:14]:
-        wdata = u_to_bin(i)
-    elif operation in operations[14:20]:
-        wdata = b_to_bin(i,pc,labels)
-    elif operation in operations[20:24]:
-        wdata = i_to_bin(i)
+    return dic
+
+wdata = []
+pc=0
+labels = labels(data)
+for i in data:
+    if ":" in i:
+        temp = i.split(":")
+        if temp[1].strip()=="":
+            continue
+        instruction = temp[1].strip()
+    instruction=i
+    operation = instruction.split()[0]
+
+    if operation in R_Type:
+        wdata.append(r_to_bin(instruction))
+    elif operation in I_Type:
+        wdata.append(i_to_bin(instruction))
+    elif operation in B_Type:
+        wdata.append(b_to_bin(instruction,pc,labels))
+    elif operation=="sw":
+        wdata.append(s_to_bin(instruction))
+    elif operation=="jal":
+        wdata.append(j_to_bin(instruction,pc,labels))
+    elif operation in ["lui","auipc"]:
+        wdata.append(u_to_bin(instruction))
     pc+=4
-    with open(output_file,"a") as f:
-        f.write(wdata+'\n')
-
-    
 
 
-
+with open(out_file,"w") as f:
+    for i in wdata:
+        f.write(i+'\n')
