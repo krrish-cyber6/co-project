@@ -1,6 +1,6 @@
 from store import Register_Mapping,I_type
 instr = I_type
-
+ 
 #Function to convert immediate value to binary
 def imm_to_bin(imm, pc = None, label = None):
     imm = int(imm)
