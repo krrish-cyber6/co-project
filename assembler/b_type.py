@@ -1,6 +1,6 @@
-from store import Register_Mapping,B_TYPE
+from store import Register_Mapping,B_Type
 def b_type_encoder(func,r1,r2,off_val,pc,labels):
-    b_func3=B_TYPE
+    b_func3=B_Type
     opcode="1100011"
     if off_val.lstrip("-").isdigit():
         offset=int(off_val)
