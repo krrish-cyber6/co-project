@@ -39,6 +39,7 @@ def i_type(asm_ins,registers,pc,mem):
         imm_offset = int(sext(imm),2)
 
         fin_mem_addr = base_reg + imm_offset
+        
         registers[rd] = mem[fin_mem_addr] &0xFFFFFFFF
 
         
