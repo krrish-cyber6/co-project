@@ -6,10 +6,13 @@ from simulator.py import registers
 [11:7] = rd
 [6:0] = opcode
 '''
+
+# Function to sign-extend immediate value
 def sext(imm):
     return imm[0]*20 + imm[0:12]
 
 def i_type(asm_ins):
+
     b_imm = asm_ins[20:32]
     imm = int(asm_ins[20:32],2)
     rs1 = int(asm_ins[15:20],2)
@@ -20,6 +23,11 @@ def i_type(asm_ins):
     if funct3 == "000" and opcode == "0010011": #addi
         registers[rd] = format((int(sext(b_imm),2) + int(registers[rs1],2))&0xFFFFFFFF,"032b")
 
+    elif funct3 == "011" and opcode == "0010011": #sltiu
+        if int(registers[rs1],2) < int(sext(b_imm),2): # if unsigned(rs) < unsigned(imm)
+            registers[rd] = format(1,"032b")
+        else:
+            registers[rd] = format(0,"032b")
 
         
     
