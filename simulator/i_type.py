@@ -9,25 +9,37 @@ from simulator.py import registers
 
 # Function to sign-extend immediate value
 def sext(imm):
-    return imm[0]*20 + imm[0:12]
+    sign_bit = imm[0]
+    return sign_bit*20 + imm[0:12] #sign-extend with sign bit
 
-def i_type(asm_ins):
 
-    b_imm = asm_ins[20:32]
-    imm = int(asm_ins[20:32],2)
-    rs1 = int(asm_ins[15:20],2)
+def i_type(asm_ins,registers,pc,mem):
+
+
+    imm = asm_ins[20:32]
+    rs1 = asm_ins[15:20]
     funct3 = asm_ins[12:15]
-    rd = int(asm_ins[7:12],2)
+    rd = asm_ins[7:12]
     opcode = asm_ins[0:7]
 
+
     if funct3 == "000" and opcode == "0010011": #addi
-        registers[rd] = format((int(sext(b_imm),2) + int(registers[rs1],2))&0xFFFFFFFF,"032b")
+        registers[rd] = (int(sext(imm),2) + registers[rs1])&0xFFFFFFFF
+
 
     elif funct3 == "011" and opcode == "0010011": #sltiu
-        if int(registers[rs1],2) < int(sext(b_imm),2): # if unsigned(rs) < unsigned(imm)
-            registers[rd] = format(1,"032b")
+        if registers[rs1] < int(sext(imm),2): # if unsigned(rs) < unsigned(imm)
+            registers[rd] = 1 &0xFFFFFFFF
         else:
-            registers[rd] = format(0,"032b")
+            registers[rd] = 0 &0xFFFFFFFF
+
+
+    elif funct3 == "010" and opcode == "0000011": #lw
+        base_reg = registers[rs1]
+        imm_offset = int(sext(imm),2)
+
+        fin_mem_addr = base_reg + imm_offset
+        registers[rd] = mem[fin_mem_addr] &0xFFFFFFFF
 
         
     
