@@ -1,12 +1,3 @@
-from simulator.py import registers
-'''
-[31:20] = imm[11:0]
-[19:15] = rs1
-[14:12] = funct3
-[11:7] = rd
-[6:0] = opcode
-'''
-
 # Function to sign-extend immediate value
 def sext(imm):
     sign_bit = imm[0]
@@ -39,8 +30,25 @@ def i_type(asm_ins,registers,pc,mem):
         imm_offset = int(sext(imm),2)
 
         fin_mem_addr = base_reg + imm_offset
-        
+
         registers[rd] = mem[fin_mem_addr] &0xFFFFFFFF
+
+    elif funct3 == "000" and opcode == "1100111": #jalr
+        registers[rd] = pc + 4 #return address
+
+        jump_to = registers[rs1] + int(sext(imm), 2) 
+
+        # making LSB=0 before jumping
+        bin_jump = format(jump_to,"032b")
+        bin_jump = bin_jump[0:31] + "0"
+        
+        pc_jump = int(bin_jump,2) 
+
+        return pc_jump
+
+
+
+
 
         
     
