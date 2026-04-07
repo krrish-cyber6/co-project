@@ -1,7 +1,7 @@
 # Function to sign-extend immediate value
 def sext(imm):
     sign_bit = imm[0]
-    return sign_bit*20 + imm[0:12] #sign-extend with sign bit
+    return sign_bit*(32-len(imm)) + imm #sign-extend with sign bit
 
 
 def i_type(asm_ins,registers,pc,mem):
