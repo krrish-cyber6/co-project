@@ -5,7 +5,7 @@ def signed(n,n1):
     else:
         return n
 
-def rbin_op(bin_instruction, registers):
+def rbin_op(bin_instruction, registers,pc):
     funct7 = bin_instruction[0:7]
     rs2 = bin_instruction[7:12]
     rs1 = bin_instruction[12:17]
@@ -34,4 +34,7 @@ def rbin_op(bin_instruction, registers):
         elif funct3=="111":
             registers[rd]=(registers[rs1]&registers[rs2])&0xFFFFFFFF
         else :
+            return pc+4
             raise KeyError
+        
+    return pc+4

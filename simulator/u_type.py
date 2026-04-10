@@ -1,4 +1,4 @@
-def u_type(binary_instruction,registers,pc):
+def ubin_op(binary_instruction,registers,pc):
     immediate_binary=binary_instruction[0:20]
     rd=binary_instruction[20:25]
     opcode=binary_instruction[25:]   

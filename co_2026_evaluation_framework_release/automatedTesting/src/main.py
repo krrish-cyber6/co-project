@@ -2,10 +2,10 @@
 
 import sys
 import os
-from colors import bcolors
-from AsmGrader import AsmGrader
-from SimGrader import SimGrader
-from Results import Results
+from co_2026_evaluation_framework_release.automatedTesting.src.colors import bcolors
+from co_2026_evaluation_framework_release.automatedTesting.src.AsmGrader import AsmGrader
+from co_2026_evaluation_framework_release.automatedTesting.src.SimGrader import SimGrader
+from co_2026_evaluation_framework_release.automatedTesting.src.Results import Results
 
 
 VERBOSE = False

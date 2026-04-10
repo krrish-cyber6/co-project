@@ -1,4 +1,4 @@
-def s_type(binary_instruction,registers,memory,pc):
+def sbin_op(binary_instruction,registers,memory,pc):
     
     opcode=binary_instruction[25:]
     funct3=binary_instruction[17:20]  

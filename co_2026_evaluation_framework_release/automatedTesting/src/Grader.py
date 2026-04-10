@@ -1,7 +1,7 @@
 # Parent class for all graders
 from os import listdir
 from os.path import isfile, join
-from colors import bcolors
+from co_2026_evaluation_framework_release.automatedTesting.src.colors import bcolors
 
 class Grader:
 	## ---- either 'linux' or 'windows'

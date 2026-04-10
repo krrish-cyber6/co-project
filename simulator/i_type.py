@@ -4,14 +4,14 @@ def sext(imm):
     return sign_bit*(32-len(imm)) + imm #sign-extend with sign bit
 
 
-def i_type(asm_ins,registers,pc,mem):
+def ibin_op(asm_ins,registers,pc,mem):
 
 
-    imm = asm_ins[20:32]
-    rs1 = asm_ins[15:20]
-    funct3 = asm_ins[12:15]
-    rd = asm_ins[7:12]
-    opcode = asm_ins[0:7]
+    imm = asm_ins[0:12]
+    rs1 = asm_ins[12:17]
+    funct3 = asm_ins[17:20]
+    rd = asm_ins[20:25]
+    opcode = asm_ins[25:32]
 
 
     if funct3 == "000" and opcode == "0010011": #addi
@@ -46,7 +46,7 @@ def i_type(asm_ins,registers,pc,mem):
 
         return pc_jump
 
-
+    return pc+4
 
 
 

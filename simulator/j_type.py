@@ -2,16 +2,16 @@ def sext(imm):
     sign_bit = imm[0]
     return sign_bit*(32-len(imm)) + imm #sign-extend with sign bit
 
-def j_type(asm_ins,registers,pc,mem):
+def jbin_op(asm_ins,registers,pc,mem):
     '''
     The imm value is split across [20|10:1|11|19:12] so just collected them
     asm_ins[0] corresponds to bit 31 in imm[31:12]
     '''
 
-    imm = asm_ins[0] + asm_ins[1:11] + asm_ins[11] + asm_ins[12:20] #!! CHECK THIS PART !!
+    imm = asm_ins[0] + asm_ins[12:20] + asm_ins[11] + asm_ins[1:11] + "0" #!! CHECK THIS PART !!
     
-    rd = asm_ins[7:12]
-    opcode = asm_ins[0:7]
+    rd = asm_ins[20:25]
+    opcode = asm_ins[25:]
 
 
     if opcode == "1101111": #jal
