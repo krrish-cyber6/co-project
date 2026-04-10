@@ -1,7 +1,7 @@
-def signed(n):
-    temp=format(n,"032b")
+def signed(n,n1):
+    temp=format(n,f"0{n1}b")
     if temp[0]=="1":
-        return n-2**32
+        return n-2**n1
     else:
         return n
 

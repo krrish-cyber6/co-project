@@ -33,10 +33,10 @@ registers = {
 }
 #r-type part
 
-def signed(n):
-    temp=format(n,"032b")
+def signed(n,n1):
+    temp=format(n,f"0{n1}b")
     if temp[0]=="1":
-        return n-2**32
+        return n-2**n1
     else:
         return n
 
@@ -57,7 +57,7 @@ def rbin_op(bin_instruction, registers):
         elif funct3=="001":
             registers[rd]=((registers[rs1]&0xFFFFFFFF)<<(registers[rs2]&31))&0xFFFFFFFF
         elif funct3=="010":
-            registers[rd]=(int(signed(registers[rs1])<signed(registers[rs2])))&0xFFFFFFFF
+            registers[rd]=(int(signed(registers[rs1],32)<signed(registers[rs2],32)))&0xFFFFFFFF
         elif funct3=="011":
             registers[rd]=int((registers[rs1])<(registers[rs2]))&0xFFFFFFFF
         elif funct3=="100":
