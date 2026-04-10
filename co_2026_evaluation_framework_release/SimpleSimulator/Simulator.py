@@ -37,8 +37,10 @@ registers = {
 
 
 memory = []
+stack_memory=[]
 for i in range(0,32):
     memory.append(0&0xFFFFFFFF)
+    stack_memory.append(0&0xFFFFFFFF)
 
 #r-type part
 def sext(imm):
@@ -128,7 +130,7 @@ def bbin_op(ins,pc,registers):
             pc+=4
     return pc
 
-def ibin_op(asm_ins,registers,pc,mem):
+def ibin_op(asm_ins,registers,pc,mem,smem):
 
 
     imm = asm_ins[0:12]
@@ -152,11 +154,14 @@ def ibin_op(asm_ins,registers,pc,mem):
     elif funct3 == "010" and opcode == "0000011": #lw
         base_reg = registers[rs1]
         imm_offset = int(sext(imm),2)
-
-        fin_mem_addr = base_reg + imm_offset
-        fin_mem_addr = int((fin_mem_addr-int(0x00010000))/4)
-
-        registers[rd] = mem[fin_mem_addr] &0xFFFFFFFF
+        if rs1=="00010":#stack memory access
+            fin_mem_addr = base_reg + imm_offset
+            fin_mem_addr = int((fin_mem_addr-0x00000100)//4)
+            registers[rd] = smem[fin_mem_addr]&0xFFFFFFFF
+        else:
+            fin_mem_addr = base_reg + imm_offset
+            fin_mem_addr = int((fin_mem_addr-0x00010000)//4)
+            registers[rd] = mem[fin_mem_addr]&0xFFFFFFFF
 
     elif funct3 == "000" and opcode == "1100111": #jalr
         registers[rd] = pc + 4 #return address
@@ -179,10 +184,10 @@ def jbin_op(asm_ins,registers,pc,mem):
     asm_ins[0] corresponds to bit 31 in imm[31:12]
     '''
 
-    imm = asm_ins[0] + asm_ins[1:11] + asm_ins[11] + asm_ins[12:20] #!! CHECK THIS PART !!
+    imm = asm_ins[0] + asm_ins[12:20] + asm_ins[11] + asm_ins[1:11] + "0"#!! CHECK THIS PART !!
     
-    rd = asm_ins[7:12]
-    opcode = asm_ins[0:7]
+    rd = asm_ins[20:25]
+    opcode = asm_ins[25:32]
 
 
     if opcode == "1101111": #jal
@@ -197,7 +202,7 @@ def jbin_op(asm_ins,registers,pc,mem):
 
         return pc_jump
     return pc+4    
-def sbin_op(binary_instruction,registers,memory,pc):
+def sbin_op(binary_instruction,registers,memory,smemory,pc):
     
     opcode=binary_instruction[25:]
     funct3=binary_instruction[17:20]  
@@ -214,10 +219,14 @@ def sbin_op(binary_instruction,registers,memory,pc):
     
     if immediate_binary[0]=="1":
         immediate_integer=immediate_integer-2**12
-   
-    address=registers[rs1]+immediate_integer
-    address=int((address-int(0x00010000))/4)
-    memory[address]=registers[rs2]
+    if rs1=="00010":
+        address=registers[rs1]+immediate_integer
+        address=int((address-0x00000100)/4)
+        smemory[address]=registers[rs2]
+    else:
+        address=registers[rs1]+immediate_integer
+        address=int((address-0x00010000)/4)
+        memory[address]=registers[rs2]
     
     return pc + 4
     
@@ -276,15 +285,16 @@ def main():
         if opcode=="0110011":#R
             pc= rbin_op(i,registers,pc)
         elif opcode=="0010011" or opcode=="0000011" or opcode=="1100111":#I
-            pc=ibin_op(i,registers,pc,memory)
+            pc=ibin_op(i,registers,pc,memory,stack_memory)
         elif opcode=="0100011":#s
-            pc=sbin_op(i,registers,memory,pc)
+            pc=sbin_op(i,registers,memory,stack_memory,pc)
         elif opcode=="1100011":#b
             pc=bbin_op(i,pc,registers)
         elif opcode=="1101111":#j
             pc=jbin_op(i,registers,pc,memory)
         elif opcode=="0110111" or opcode=="0010111":#u
             pc=ubin_op(i,registers,pc)
+        registers["00000"]=0
         pc_str = format(pc,"032b")
         wdata.append("0b"+pc_str+" ")
         for i in registers:

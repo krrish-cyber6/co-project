@@ -184,10 +184,10 @@ def jbin_op(asm_ins,registers,pc,mem):
     asm_ins[0] corresponds to bit 31 in imm[31:12]
     '''
 
-    imm = asm_ins[0] + asm_ins[12:20] + asm_ins[11] + asm_ins[1:11] + "0"#!! CHECK THIS PART !!
+    imm = asm_ins[0] + asm_ins[1:11] + asm_ins[11] + asm_ins[12:20] #!! CHECK THIS PART !!
     
-    rd = asm_ins[20:25]
-    opcode = asm_ins[25:32]
+    rd = asm_ins[7:12]
+    opcode = asm_ins[0:7]
 
 
     if opcode == "1101111": #jal
@@ -294,7 +294,6 @@ def main():
             pc=jbin_op(i,registers,pc,memory)
         elif opcode=="0110111" or opcode=="0010111":#u
             pc=ubin_op(i,registers,pc)
-        registers["00000"]=0
         pc_str = format(pc,"032b")
         wdata.append("0b"+pc_str+" ")
         for i in registers:
