@@ -1,6 +1,6 @@
 # Result generator class
 
-from colors import bcolors
+from co_2026_evaluation_framework_release.automatedTesting.src.colors import bcolors
 
 class Results:
 

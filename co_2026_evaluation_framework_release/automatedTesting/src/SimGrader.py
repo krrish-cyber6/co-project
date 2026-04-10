@@ -1,8 +1,8 @@
 # Simulator Grader class
 
-from colors import bcolors
+from co_2026_evaluation_framework_release.automatedTesting.src.colors import bcolors
 
-from Grader import Grader
+from co_2026_evaluation_framework_release.automatedTesting.src.Grader import Grader
 import os
 
 class SimGrader(Grader):
