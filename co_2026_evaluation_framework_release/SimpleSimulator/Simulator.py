@@ -83,9 +83,10 @@ def rbin_op(bin_instruction, registers,pc):
         elif funct3=="111":
             registers[rd]=(registers[rs1]&registers[rs2])&0xFFFFFFFF
         else :
-            return pc+4
             raise KeyError
-        
+    else:
+        raise KeyError
+    
     return pc+4
         
 def bbin_op(ins,pc,registers):
@@ -97,7 +98,8 @@ def bbin_op(ins,pc,registers):
     offset=int(imm,2)
     if offset & 1<<12:
         offset-=1<<13
-
+    if pc % 4 != 0 or pc < 0:  
+        raise KeyError
     if func3=="000":
         if r1==r2:
             pc+=offset
@@ -109,15 +111,15 @@ def bbin_op(ins,pc,registers):
         else:
             pc+=4
     elif func3=="100":
-        if r1<r2:
-            pc+=offset
+        if signed(r1, 32) < signed(r2, 32):
+            pc += offset
         else:
-            pc+=4
+            pc += 4
     elif func3=="101":
-        if r1>=r2:
-            pc+=offset
+        if signed(r1, 32) >= signed(r2, 32):
+            pc += offset
         else:
-            pc+=4
+            pc += 4
     elif func3=="110":
         if (r1 & 0xFFFFFFFF)<(r2 & 0xFFFFFFFF):
             pc+=offset
@@ -128,6 +130,8 @@ def bbin_op(ins,pc,registers):
             pc+=offset
         else:
             pc+=4
+    else:
+        raise KeyError
     return pc
 
 def ibin_op(asm_ins,registers,pc,mem,smem):
@@ -145,7 +149,9 @@ def ibin_op(asm_ins,registers,pc,mem,smem):
 
 
     elif funct3 == "011" and opcode == "0010011": #sltiu
-        if registers[rs1] < int(sext(imm),2): # if unsigned(rs) < unsigned(imm)
+        imm_val = int(sext(imm),2) & 0xFFFFFFFF  
+        rs1_val = registers[rs1] & 0xFFFFFFFF
+        if rs1_val < imm_val:
             registers[rd] = 1 &0xFFFFFFFF
         else:
             registers[rd] = 0 &0xFFFFFFFF
@@ -156,10 +162,14 @@ def ibin_op(asm_ins,registers,pc,mem,smem):
         imm_offset = int(sext(imm),2)
         if rs1=="00010":#stack memory access
             fin_mem_addr = base_reg + imm_offset
+            if not (0x00000100 <= fin_mem_addr <= 0x0000017F):
+                raise Exception
             fin_mem_addr = int((fin_mem_addr-0x00000100)//4)
             registers[rd] = smem[fin_mem_addr]&0xFFFFFFFF
         else:
             fin_mem_addr = base_reg + imm_offset
+            if not (0x00010000 <= fin_mem_addr <= 0x0001007F):
+                raise Exception
             fin_mem_addr = int((fin_mem_addr-0x00010000)//4)
             registers[rd] = mem[fin_mem_addr]&0xFFFFFFFF
 
@@ -175,7 +185,8 @@ def ibin_op(asm_ins,registers,pc,mem,smem):
         pc_jump = int(bin_jump,2) 
 
         return pc_jump
-
+    else:
+        raise KeyError
     return pc+4
 
 def jbin_op(asm_ins,registers,pc,mem):
@@ -200,8 +211,17 @@ def jbin_op(asm_ins,registers,pc,mem):
         
         pc_jump = int(bin_jump,2)  # convert to int and store in final pc_jump
 
+        bin_jump = format(jump_to,"032b")
+        bin_jump = bin_jump[0:31] + "0"
+        pc_jump = int(bin_jump,2) 
+
+        if pc_jump % 4 != 0 or pc_jump < 0 or pc_jump >= len(mem)*4:
+            raise Exception
+        
         return pc_jump
-    return pc+4    
+    else:
+        raise KeyError
+        
 def sbin_op(binary_instruction,registers,memory,smemory,pc):
     
     opcode=binary_instruction[25:]
@@ -221,11 +241,15 @@ def sbin_op(binary_instruction,registers,memory,smemory,pc):
         immediate_integer=immediate_integer-2**12
     if rs1=="00010":
         address=registers[rs1]+immediate_integer
-        address=int((address-0x00000100)/4)
+        if not (0x00000100 <= address <= 0x0000017F):
+            raise KeyError("Stack memory access out of bounds")
+        address=int((address-0x00000100)//4)
         smemory[address]=registers[rs2]
     else:
         address=registers[rs1]+immediate_integer
-        address=int((address-0x00010000)/4)
+        if not (0x00010000 <= address <= 0x0001007F):
+            raise KeyError("Data memory access out of bounds")
+        address=int((address-0x00010000)//4)
         memory[address]=registers[rs2]
     
     return pc + 4
@@ -259,51 +283,59 @@ def main():
     with open(data_file,"r") as f:
         data = [i.strip() for i in f.readlines()]
 
-    
-
     pc=0
     wdata = []
-    while (pc<=(len(data)-1)*4):
-        
-        i=data[int(pc/4)] 
-        if i=="00000000000000000000000001100011":
-            with open(out_file,"w") as f:
-                wdata.append("0b"+pc_str+" ")
-                for i in registers:
-                    temp="0b"+format(registers[i],"032b")+" "
-                    wdata.append(temp)
-                wdata.append("\n")  
-                for i in wdata:
-                    f.write(i)
-               
-                temp=0x00010000
-                for i in memory:
-                    f.write("0x000"+format(temp,'X')+":"+"0b"+format(i,"032b")+'\n')
-                    temp+=4
-                return 
-        opcode = i[25:]
-        if opcode=="0110011":#R
-            pc= rbin_op(i,registers,pc)
-        elif opcode=="0010011" or opcode=="0000011" or opcode=="1100111":#I
-            pc=ibin_op(i,registers,pc,memory,stack_memory)
-        elif opcode=="0100011":#s
-            pc=sbin_op(i,registers,memory,stack_memory,pc)
-        elif opcode=="1100011":#b
-            pc=bbin_op(i,pc,registers)
-        elif opcode=="1101111":#j
-            pc=jbin_op(i,registers,pc,memory)
-        elif opcode=="0110111" or opcode=="0010111":#u
-            pc=ubin_op(i,registers,pc)
-        registers["00000"]=0
-        pc_str = format(pc,"032b")
-        wdata.append("0b"+pc_str+" ")
-        for i in registers:
-            temp="0b"+format(registers[i],"032b")+" "
-            wdata.append(temp)
-        
-        wdata.append("\n")
-        
-
-        
+    virtual_halt=False
+    try:
+        while (pc<=(len(data)-1)*4):
+            i=data[int(pc/4)] 
+            if i=="00000000000000000000000001100011":
+                virtual_halt=True
+                with open(out_file,"w") as f:
+                    wdata.append("0b"+pc_str+" ")
+                    for i in registers:
+                        temp="0b"+format(registers[i],"032b")+" "
+                        wdata.append(temp)
+                    wdata.append("\n")  
+                    for i in wdata:
+                        f.write(i)
+                
+                    temp=0x00010000
+                    for i in memory:
+                        f.write("0x000"+format(temp,'X')+":"+"0b"+format(i,"032b")+'\n')
+                        temp+=4
+                    return 
+            opcode = i[25:]    
+            if opcode not in ["0110011", "0010011", "0000011", "1100111", "0100011", "1100011", "1101111", "0110111", "0010111"]:
+                print(f"Error at line {pc//4} : Invalid opcode")
+                return
+            if opcode=="0110011":#R
+                pc= rbin_op(i,registers,pc)
+            elif opcode=="0010011" or opcode=="0000011" or opcode=="1100111":#I
+                pc=ibin_op(i,registers,pc,memory,stack_memory)
+            elif opcode=="0100011":#s
+                pc=sbin_op(i,registers,memory,stack_memory,pc)
+            elif opcode=="1100011":#b
+                pc=bbin_op(i,pc,registers)
+            elif opcode=="1101111":#j
+                pc=jbin_op(i,registers,pc,memory)
+            elif opcode=="0110111" or opcode=="0010111":#u
+                pc=ubin_op(i,registers,pc)
+            registers["00000"]=0
+            pc_str = format(pc,"032b")
+            wdata.append("0b"+pc_str+" ")
+            for i in registers:
+                temp="0b"+format(registers[i],"032b")+" "
+                wdata.append(temp)
+            
+            wdata.append("\n")
+            
+        if virtual_halt==False:
+            print(f"Error at line {pc//4}: Virtual halt not found")
+            return  
+    except:
+        print(f"Error at line {pc//4}") 
+        return  
+       
 if __name__ == "__main__":
     main()
